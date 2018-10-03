@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Homepage</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+        crossorigin="anonymous">
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>Hello, <span id="loggedInName"></span></h1>
+    </div>
+    <p> Go to: </p>
+    <button type="button" class="btn btn-outline-secondary" id="myProfile">My profile</button>
+    <button type="button" class="btn btn-outline-secondary" id="blogs">Blogs</button>
+    <button type="button" class="btn btn-outline-secondary" id="tech">Tech companies</button>
+    <button type="button" class="btn btn-outline-secondary" id="jobs">Jobs</button>
+    <button type="button" class="btn btn-outline-secondary" id="events">Events</button>
+
+    <hr/>
+    <button type="button" class="btn btn-outline-primary" id="logout">Logout</button>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" ></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+        crossorigin="anonymous"></script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+        crossorigin="anonymous"></script>
+
+    <script src="http://sabioapi2.azurewebsites.net/scripts/sabio.js"></script>
+    <!-- All your code goes below here-->
+    <script type="text/javascript">
+
+        sabio.page.startUp = function() { 
+           sabio.page.userDb(sabio.page.getUserSuccess, sabio.page.ajaxError, "http://sabiobootcampapi.azurewebsites.net/api/tests/auth/current")
+             $("#logout").on("click", sabio.page.handlers.logout)  
+        }
+
+        sabio.page.handlers.logout = function() {
+            sabio.page.userDb(sabio.page.logoutSuccess, sabio.page.ajaxError, "http://sabiobootcampapi.azurewebsites.net/api/users/logout")
+        }
+
+        sabio.page.userDb = function(onSuccess, onError, bananna) {
+            const url = bananna
+
+            const settings = {
+                cache: false
+                , contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+                , dataType: "json"
+                , success: onSuccess
+                , error: onerror
+                , type: "GET"
+                , xhrFields: {
+                    withCredentials: true
+                }
+            };
+            $.ajax(url, settings);
+        };
+
+        sabio.page.getUserSuccess = function(data, status, xhr) {
+            console.log("ajax get success");
+            console.log(data.item.actualUserId);
+            $("#loggedInName").text(data.item.user.name);
+        };
+
+        sabio.page.logoutSuccess = function(data, status, xhr) {
+            console.log("ajax logout success");
+            // $(location).attr('href', 'login-w1d1.html');
+            window.location.replace("login-w1d1.html");
+
+        };
+
+        sabio.page.ajaxError = function() {
+            console.log("ajax error");
+            console.log(data.responseText);
+        };
+
+
+    </script>
+
+</body>
+
+</html>

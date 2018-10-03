@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Login - w1d1</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+        crossorigin="anonymous">
+
+</head>
+
+<body>
+        <div class="container">
+                <div class="row">
+                    <div class="col-md-6" id="frmContainer">
+                        <form id="loginForm">
+        
+                            <div id="header" class="header text-secondary">
+                                <h2>Login</h2>
+                            </div>
+        
+                            <div class="shadow p-3 mb-5 bg-white rounded">
+
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email here (example: email@email.com)" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="password (with at least one digit, one special character, one capital letter " required>
+                                </div>
+        
+                            </div>
+        
+                            <button type="button" class="btn btn-primary" id="login">Login</button>
+        
+                        </form>
+        
+                    </div>
+                </div>
+            </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" ></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+        crossorigin="anonymous"></script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+        crossorigin="anonymous"></script>
+
+    <script src="http://sabioapi2.azurewebsites.net/scripts/sabio.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.js"></script>
+    <!-- All your code goes below here-->
+    <script type="text/javascript">
+
+
+        sabio.page.startUp = function() {
+            console.log("page has loaded") // keep in there until you are sure it's working
+            // this is a good place to put the authorization if there is going to be one passed
+            $("#login").on("click", sabio.page.handlers.submit);
+            $("#loginForm").validate(sabio.utilities.formRules());
+        };
+
+        sabio.page.handlers.submit = function() {
+            const data = sabio.readUserRegistration();
+            if ($("#loginForm").valid()) {
+                sabio.page.loginUserToDB(sabio.page.ajaxSuccess, sabio.page.ajaxError, data);
+                sabio.utilities.clearForm();
+            };
+        };
+        
+        sabio.page.loginUserToDB = function(onSuccess, onError, data) {
+            const url="http://sabiobootcampapi.azurewebsites.net/api/users/login"
+            const settings = {
+                cache: false
+                , contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+                , dataType: "json"
+                , data: data
+                , success: onSuccess
+                , error: onError
+                , type: "POST"
+                , xhrFields: {
+                    withCredentials: true
+                }
+            };
+            $.ajax(url, settings);
+        };
+
+        sabio.page.ajaxSuccess = function(data, status, xhr) {
+            console.log("ajax post (login) was sucessful")
+            // console.log(data);
+            window.location.replace("homepage-w1d2.html");
+
+        };
+
+         sabio.page.ajaxError = function(data, status, xhr) {
+             console.log("there was an error with the post");
+            //  console.log(data.responseText)
+        };
+
+        sabio.readUserRegistration = function() {
+            return {
+                email: $("#email").val()
+                , password: $("#password").val()
+            };
+        };
+
+        $.validator.addMethod("regex", function(value, element, regexpr) {
+            return regexpr.test(value);
+            }, "Please enter a valid password.");
+        
+        sabio.utilities.formRules = function() {
+            return {
+                rules: {
+                    email: {
+                        required: true
+                        , email: true
+                    }
+                    , password: {
+                        required: true
+                        , regex: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!$%^&*-]).{8,}/
+                        , minlength: 8
+                    }
+                }
+            };
+        };
+        
+
+        sabio.utilities.clearForm = function() {
+            $("form")[0].reset();
+        };
+    </script>
+
+        
+
+</body>
+
+</html>
