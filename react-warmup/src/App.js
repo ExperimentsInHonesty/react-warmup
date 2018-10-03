@@ -12,6 +12,8 @@ class App extends Component {
     this.setState({ inputText: event.target.value });
   };
 
+  // blah blah blah blah
+
   render() {
     console.log("rendering!");
 
