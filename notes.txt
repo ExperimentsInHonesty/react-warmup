@@ -1,0 +1,54 @@
+http://sabiobootcampapi.azurewebsites.net/api/people
+primaryImage.imageUrl
+Title
+Bio
+Summary
+Headline
+Slug
+Status Id
+Skills
+
+page X of Y
+X = item.pageIndex = current page number
+Y = item.totalPages
+
+                        <div class="form-group">
+                            <label for=""></label>
+                            <input type="" class="form-control" id="" placeholder="">
+                        </div>
+
+{
+  "title": "string",
+  "bio": "string",
+  "summary": "string",
+  "headline": "string",
+  "slug": "string",
+  "statusId": 0,
+  "skills": [
+    "string"
+  ],
+  "primaryImage": "string"
+}
+
+Primary Image Attachement
+has a choose file button then once you get the dialog box and choose a photo there is a submit button
+
+Then there is a search box
+
+a box around the following
+image on left side with text on right and an edit button off on the top right
+Title:
+Spider-Man
+
+Bio: 
+Spider-Man is a fictional superhero...
+
+Summary: 
+The character is conceived as an orphan within the Marvel...
+
+Headline:
+Friendly, Neighborhood Spider-Man
+
+Skills: agility, superhuman strength, web slinging
+
+for the list of profiles its one box after another sequentially

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>AjaxEntityEndpoint</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+        crossorigin="anonymous">
+    <style>
+        .view-border {
+                border: 1px solid black;
+                border-radius: 10px;
+                margin: 20px;
+                padding: 5px;
+            }
+        </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <!-- <div class="container-fluid"> -->
+            <div class="col-md-6" id="frmContainer">
+                <form>
+                    <div id="header" class="header text-primary">
+                        <h2>Tech Companies to Apply To</h2>
+                    </div>
+                    <div class="shadow p-3 mb-5 bg-white rounded">
+                        <div class="form-group">
+                            <label for="company">Company</label>
+                            <input type="text" class="form-control" id="company" placeholder="for example: YouTube">
+                        </div>
+                        <div class="form-group">
+                            <label for="industry">Industry</label>
+                            <input type="text" class="form-control" id="industry" placeholder="For example: Entertainment">
+                        </div>
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" class="form-control" id="city" placeholder="For example: Playa Vista">
+                        </div>
+
+                    </div>
+
+                    <button type="button" class="btn btn-primary" id="addTechCompany">Add Tech Commpany</button>
+
+                </form>
+            </div>
+            <!-- left side of page-->
+
+            <div id="companyContainer" class="col-md-6">
+            </div>
+
+
+            <!-- <button type="button" id="cmdBack" class="btn btn-default">Back</button> -->
+        </div>
+    </div>
+
+
+
+
+    </div><!-- /.container -->
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+        crossorigin="anonymous"></script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+        crossorigin="anonymous"></script>
+
+    <script src="http://sabioapi2.azurewebsites.net/scripts/sabio.js"></script>
+    <!-- All your code goes below here-->
+    <script type="text/javascript">
+        sabio.page.activePost = null
+
+        sabio.page.startUp = function () {
+            console.log("page has loaded");
+            $.ajaxSetup({
+                headers: { 'SABIO-AUTH': 'UCM0DPUPN' }
+            });
+            $("#addTechCompany").on("click", sabio.page.handlers.addCompany);
+            sabio.page.handlers.showCompanies()
+        };
+
+        //notes to self 
+        // the page displays the companies from DB,
+        //     the form posts to the DB and re grabs all the data from dB and displays again and clears form
+        //  next steps are to make the edit and delete buttons work so that the following happens
+        // clicking edit should repopulate form with data, when you click submit it should update data in db and clear form and redisplay list from DB
+        //clicking delete should delete the record from the DB and redisplay the records.
+        // additional note, there probably is a more efficient from a wait to load perspective.  Think about it and write alternate version of this.
+
+
+        //     //copied from part3c.html needes editing to make edit and delete buttons work
+        //     $(".listings").on("click", ".delete", sabio.utilities.delete);
+        //     $(".listings").on("click", ".edit", sabio.utilities.edit);
+        // }
+
+
+        // //copied from part3c.html needes editing to make edit and delete buttons work
+        // sabio.utilities.delete = function() {
+        //     $(this).closest(".listing-row").remove()
+        // };
+        // //copied from part3c.html needes editing to make edit and delete buttons work
+        // sabio.utilities.edit = function() {
+        //     sabio.page.activePost = this; 
+        //      // reads the data from the post and fills out the form
+        //     $("#address-line1").val($(this).closest(".listing-row").find(".line-one").text());
+        //     $("#address-line2").val($(this).closest(".listing-row").find(".line-two").text());
+        //     $("#city").val($(this).closest(".listing-row").find(".city-name").text());
+        // };
+
+        //handler - path: display on right
+        sabio.page.handlers.showCompanies = function () {
+            sabio.page.entitiesDb(sabio.page.ajaxSuccessGet, sabio.page.ajaxError, "GET");
+        }
+        //handler  - path: to add to database
+        sabio.page.handlers.addCompany = function (evt) {
+            evt.preventDefault();
+            const data = sabio.page.readForm()
+
+            sabio.page.entitiesDb(sabio.page.ajaxSuccessPost, sabio.page.ajaxError, "POST", data);
+            sabio.utilities.clearForm();
+
+        };
+
+        sabio.page.readForm = function () {
+            return {
+                "company": $("#company").val()
+                , "industry": $("#industry").val()
+                , "city": $("#city").val()
+            }
+        };
+
+
+
+        //load template
+        sabio.page.loadTemplate = function () {
+            var $company = $($("#techCompanyTemplate").html());
+            return $company;
+        }
+
+        //write to template
+        sabio.page.writeToTemplate = function (data) {
+            var techCompanyTemplate = sabio.page.loadTemplate();
+            $(".techCompanyName", techCompanyTemplate).text(data.company);
+            $(".techCompanyIndustry", techCompanyTemplate).text(data.industry);
+            $(".techCompanyCity", techCompanyTemplate).text(data.city);
+            $(".techCompanyId", techCompanyTemplate).text(data.id).hide();
+            // append to DOM
+            $("#companyContainer").append(techCompanyTemplate);
+        }
+        //company loop
+        sabio.page.companyLoop = function (companyArray) {
+            companyArray.forEach(company => {
+                console.log(company.company + " " + company.industry + " " + company.city + " " + company.id);
+                sabio.page.writeToTemplate(company);
+            })
+        }
+
+        //ajax get all companies
+
+        sabio.page.entitiesDb = function (onSuccess, onError, xhr, data = null, ) {
+            var url = "http://sabioapi2.azurewebsites.net/api/entities/techCompanies";
+
+            var settings = {
+
+                cache: false
+                , contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+                , dataType: "json"
+                , data: data
+                , success: onSuccess
+                , error: onError
+                , type: xhr
+            };
+
+            $.ajax(url, settings);
+        };
+
+        //ajax success for the GET of all the records.
+        sabio.page.ajaxSuccessGet = function (data, status, xhr) {
+            console.log("ajax get successful");
+            console.log(data);
+            sabio.page.companyLoop(data.items);
+
+        };
+
+        sabio.page.ajaxSuccessPost = function (data, status, xhr) {
+            console.log("ajax post successful");
+            console.log(data);
+            $("#companyContainer").empty();
+            sabio.page.handlers.showCompanies()
+
+        };
+
+        //error method
+
+        sabio.page.ajaxError = function (data, status, xhr) {
+            console.log("there was an error");
+            console.log(data.responseText);
+        }
+
+        //. Clear form
+        sabio.utilities.clearForm = function () {
+            $("form")[0].reset();
+        };
+    </script>
+
+
+
+
+    <script type="text/template" id="techCompanyTemplate">
+        <div class="viewCard col-md-12 view-border listings">
+            <h3>Company: <span  class="techCompanyName"></span></h3>
+            <h4>Industry: <span  class="techCompanyIndustry"></span></h4>
+            <h4>City: <span class="techCompanyCity"></span></h4>
+            <p class="techCompanyId"><p>
+            <button type="button" class="btn btn-xs edit btn-success">Edit</button>
+            <button type="button" class="btn btn-xs delete btn-danger">Delete</button>
+
+        </div>
+
+    </script>
+
+
+
+
+
+
+
+</body>
+
+</html>

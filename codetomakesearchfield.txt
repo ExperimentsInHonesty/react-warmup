@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Profile</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+        crossorigin="anonymous">
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+                <div class="col-md-10" id="frmContainer">
+                
+                    <div id="header" class="header text-secondary">
+                        <h1>Profiles</h1>
+                    </div>
+                    <form>
+                    <div id="search" class="header text-secondary">
+                        <h2>Search Profiles</h2>
+                        <div class="form-group">
+                            <input type="text" placeholder="Search.." name="search">
+                            <button type="submit">Submit</button>
+                        </div>
+                    </div>
+                    </form>
+                    </div>
+                    <form>
+                    <div class="" id="divThatWrapsAroundEntireForm">
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" class="form-control" id="title" placeholder="Title">
+                        </div>
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <input type="text" class="form-control" id="bio" placeholder="Bio">
+                        </div>
+                        <div class="form-group">
+                            <label for="summary">Summary</label>
+                            <input type="text" class="form-control" id="summary" placeholder="Summary">
+                        </div>
+                        <div class="form-group">
+                            <label for="headline">Headline</label>
+                            <input type="text" class="form-control" id="headline" placeholder="Headline">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="slug">Slug</label>
+                            <input type="text" class="form-control" id="slug" placeholder="Slug">
+                        </div>
+                        <div class="form-group">
+                            <label for="statusId">Status Id</label>
+                            <input type="text" class="form-control" id="status Id" placeholder="Status Id">
+                        </div>
+                        <div class="form-group">
+                            <label for="skills">Skills</label>
+                            <input type="text" class="form-control" id="skills" placeholder="Skills">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        <div class="col-md-10" id="displayRecords">
+
+        </div>
+        <div class="col-md-10 center-block text-center" id="displayNav">
+            <button type="button" class="btn btn-outline-secondary" id="back">Back</button>
+            &nbsp; <span id="pageXOfY"></span> &nbsp;
+            <button type="button" class="btn btn-outline-secondary" id="next">Next</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+        crossorigin="anonymous"></script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+        crossorigin="anonymous"></script>
+
+    <script src="http://sabioapi2.azurewebsites.net/scripts/sabio.js"></script>
+    <!-- All your code goes below here-->
+    <script type="text/javascript">
+
+
+        // this is the url for the call to get some records
+        // http://sabiobootcampapi.azurewebsites.net/api/people/100/3
+        //ask dan how to paginate them as shown on the example image
+        sabio.page.startUp = function () {
+            sabio.page.handlers.showProfiles();
+            $("#back").on("click", sabio.page.profileBack)
+            $("#next").on("click", sabio.page.profileNext)
+        };
+
+        sabio.utilities.profileCounter = 0;
+        sabio.utilities.totalPages = 0;
+
+        sabio.page.handlers.showProfiles = function () {
+            sabio.page.profilesDb(sabio.page.ajaxSuccess, sabio.page.ajaxError, "GET", "http://sabiobootcampapi.azurewebsites.net/api/people/", sabio.utilities.profileCounter, "/99")
+        };
+//http://sabiobootcampapi.azurewebsites.net/api/people/0/99
+        sabio.page.profilesDb = function (onSuccess, onError, type, endpoint, page, qty, data = null) {
+            const url = endpoint + page + qty;
+            const settings = {
+                cache: false
+                , contentType: "application/x-www-form-urlencoded; charset=UTF-8"
+                , dataType: "json"
+                , data: data
+                , success: onSuccess
+                , error: onError
+                , type: type
+                , xhrFields: {
+                    withCredentials: true
+                }
+            };
+            $.ajax(url, settings);
+        };
+
+        sabio.page.ajaxSuccess = function (data, status, xhr) {
+            console.log("ajax success");
+            // console.log(data.item.pagedItems[0]);
+            // console.log(data.item.pagedItems[0].primaryImage.imageUrl);
+            // console.log(`page ${data.item.pageIndex+1} of ${data.item.totalPages-1}`)
+            sabio.utilities.totalPages = data.item.totalPages;
+            // console.log(sabio.utilities.totalPages)
+            sabio.page.displayWhichPage(data.item);
+            sabio.page.profileLoop(data.item.pagedItems);
+
+        };
+
+        sabio.page.ajaxError = function (data, status, xhr) {
+            console.log("ajax error");
+            console.log(data.responseText);
+        };
+
+        sabio.page.profileLoop = function (data) {
+            data.forEach(profile => sabio.page.writeToTemplate(profile));
+        }
+
+        sabio.page.displayWhichPage = function (data) {
+            sabio.utilities.profileCounter === 0 ?
+                $("#back").hide()
+                : $("#back").show()
+
+            if (sabio.utilities.profileCounter === sabio.utilities.totalPages) {
+                $("#next").hide()
+            }
+            $("#pageXOfY").text(`page ${data.pageIndex} of ${data.totalPages}`)
+        };
+
+        sabio.page.profileBack = function () {
+            sabio.utilities.profileCounter--
+            sabio.page.reloadProfile();
+        };
+
+        sabio.page.profileNext = function () {
+            sabio.utilities.profileCounter++
+            sabio.page.reloadProfile();
+        };
+
+        sabio.page.reloadProfile = function () {
+            $("#displayRecords").empty();
+            sabio.page.handlers.showProfiles()
+        };
+
+        sabio.page.loadTemplate = function () {
+            var $profile = $($("#profileTemplate").html());
+            return $profile
+        };
+
+        sabio.page.ValidURL = function (str) {
+            var pattern = new RegExp('^(https?:\/\/)?' + // protocol
+                '((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|' + // domain name
+                '((\d{1,3}\.){3}\d{1,3}))' + // OR ip (v4) address
+                '(\:\d+)?(\/[-a-z\d%_.~+]*)*' + // port and path
+                '(\?[;&a-z\d%_.~+=-]*)?' + // query string
+                '(\#[-a-z\d_]*)?$', 'i'); // fragment locater
+            if (!pattern.test(str)) {
+                alert("Please enter a valid URL.");
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        sabio.page.writeToTemplate = function (data) {
+            const profileTemplate = sabio.page.loadTemplate();
+            // if (sabio.page.ValidURL(data.primaryImage.imageUrl) === false) {
+            //     $(".image", profileTemplate).attr("src", "noimage.jpg");
+            // } else {
+            //     $(".image", profileTemplate).attr("src", data.primaryImage.imageUrl);
+            // };
+
+            if (data.primaryImage.imageUrl === null) {
+                $(".image", profileTemplate).attr("src", "noimage.jpg");
+            } else {
+                $(".image", profileTemplate).attr("src", data.primaryImage.imageUrl);
+            };
+            $(".title", profileTemplate).text(data.title);
+            $(".bio", profileTemplate).text(data.bio);
+            $(".headline", profileTemplate).text(data.bio);
+            $(".slug", profileTemplate).text(data.bio);
+            $(".statusId", profileTemplate).text(data.bio);
+            $(".skills", profileTemplate).text(data.bio);
+            // append to DOM
+            $("#displayRecords").append(profileTemplate)
+        };
+    </script>
+
+    <script type="text/template" id="profileTemplate">
+        <div class="col-md-12 border border-secondary">
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="" height="100" class="image"/>
+                 </div>
+                <div class="col-md-8">
+                    <p>Title:<span class="title"></span></p>
+                    <p>Bio:<span class="bio"></span></p>
+                    <p>Headline:<span class="headline"></span></p>
+                    <p>Slug:<span class="slug"></span></p>
+                    <p>StatusId:<span class="statusId"></span></p>
+                    <p>skills:<span class="skills"></span></p>
+                </div>
+            </div>
+        </div>
+
+    </script>
+
+</body>
+
+</html>
