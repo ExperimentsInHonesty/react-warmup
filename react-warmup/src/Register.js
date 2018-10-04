@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import Validate from "./Validate";
 
 console.log("running Register.js!");
 
@@ -31,31 +32,32 @@ class Register extends React.Component {
     // password_isValid: false
   };
 
-  validateEmail = email =>
-    /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
+  // validateEmail = email =>
+  //   /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
 
-  validatePassword = password =>
-    /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!$%^&*-]).{8,}/.test(
-      password
-    );
+  // validatePassword = password =>
+  //   /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!$%^&*-]).{8,}/.test(
+  //     password
+  //   );
 
-  validatePasswordConfirm = pass2 => this.state.password.value === pass2;
+  // validatePasswordConfirm = pass2 => this.state.password.value === pass2;
 
-  validateAllOtherFields = other => other.length >= 2 && other.length <= 100;
+  // validateAllOtherFields = other => other.length >= 2 && other.length <= 100;
 
-  validateAllFields = (typeOfItem, valueOfItem) => {
-    if (typeOfItem === "email") {
-      return this.validateEmail(valueOfItem);
-    } else if (typeOfItem === "password") {
-      return this.validatePassword(valueOfItem);
-    } else if (typeOfItem === "passwordConfirm") {
-      return this.validatePasswordConfirm(valueOfItem);
-    } else {
-      return this.validateAllOtherFields(valueOfItem);
-    }
-  };
+  // validateAllFields = (typeOfItem, valueOfItem) => {
+  //   if (typeOfItem === "email") {
+  //     return this.validateEmail(valueOfItem);
+  //   } else if (typeOfItem === "password") {
+  //     return this.validatePassword(valueOfItem);
+  //   } else if (typeOfItem === "passwordConfirm") {
+  //     return this.validatePasswordConfirm(valueOfItem);
+  //   } else {
+  //     return this.validateAllOtherFields(valueOfItem);
+  //   }
+  // };
 
   handleInputChange = event => {
+    // event.preventDefault();
     const name = event.target.name;
     const value = event.target.value;
     let isValid = false;
@@ -99,6 +101,7 @@ class Register extends React.Component {
   render() {
     return (
       <div>
+        <Validate />
         <div>
           First Name:
           <input
@@ -153,19 +156,15 @@ class Register extends React.Component {
             value={this.state.passwordConfirm.value}
             name="passwordConfirm"
             // onBlur={
-            //   this.passwordMatch(
-            //     this.state.password.value,
-            //     this.state.passwordConfirm.value
-            //   ) ? (
-            //     <span style={{ color: "red" }}>
-            //       One upper, one lower, one number, one symbol, 8 characters
-            //     </span>
-            //   ) : (
-            //     <span>something else</span>
-            //   )
+            //   <span style={{ color: "blue" }}>This is a test version</span>
             // }
             onChange={this.handleInputChange}
           />
+          {/* {this.state.passwordConfirm.length > 0 && (
+            <span style={{ color: "red" }}>
+              This must match the password above
+            </span>
+          )} */}
           {!this.state.passwordConfirm.isValid && (
             <span style={{ color: "red" }}>
               This must match the password above
