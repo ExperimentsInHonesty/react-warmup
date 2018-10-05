@@ -7,28 +7,32 @@ class Register extends React.Component {
   state = {
     firstName: {
       value: "",
-      isValid: false
+      isValid: false,
+      messageText: "must have 2 characters"
     },
     lastName: {
       value: "",
-      isValid: false
+      isValid: false,
+      messageText: "must have 2 characters"
     },
     email: {
       value: "",
-      isValid: false
+      isValid: false,
+      messageText: "email needs to be formatted a certain way message"
     },
     password: {
       value: "",
-      isValid: false
+      isValid: false,
+      messageText:
+        "Password must contain an upper & lower case letter, a digit, a symbol and a total of 8 characters"
     },
     passwordConfirm: {
       value: "",
-      isValid: false
+      isValid: false,
+      messageText: "password in this field needs to match the above password"
     },
     success: false,
     error: false
-    // email_isValid: false,
-    // password_isValid: false
   };
 
   validateEmail = email =>
@@ -43,6 +47,7 @@ class Register extends React.Component {
 
   validateAllOtherFields = other => other.length >= 2 && other.length <= 100;
 
+  // message = "";
   validateAllFields = (typeOfItem, valueOfItem) => {
     if (typeOfItem === "email") {
       return this.validateEmail(valueOfItem);
@@ -68,16 +73,6 @@ class Register extends React.Component {
       }
     });
   };
-
-  // handleEmailChange = event => {
-  //   const email = event.target.value;
-  //   let email_isValid = false;
-  //   email_isValid = this.validateEmail(email);
-
-  //   this.setState({
-  //  email: email, email_isValid: true/false
-  // });
-  // };
 
   handleRegisterClicked = () => {
     //get the values
@@ -107,6 +102,10 @@ class Register extends React.Component {
             name="firstName"
             onChange={this.handleInputChange}
           />
+          {this.state.firstName.value.length > 0 &&
+            this.state.firstName.value.length < 3 &&
+            !this.state.firstName.isValid &&
+            this.state.firstName.messageText}
         </div>
         <div>
           Last Name:
@@ -116,6 +115,10 @@ class Register extends React.Component {
             name="lastName"
             onChange={this.handleInputChange}
           />
+          {this.state.lastName.value.length > 0 &&
+            this.state.lastName.value.length < 3 &&
+            !this.state.lastName.isValid &&
+            this.state.lastName.messageText}
         </div>
         <div>
           Email:
@@ -125,11 +128,9 @@ class Register extends React.Component {
             name="email"
             onChange={this.handleInputChange}
           />
-          {!this.state.email.isValid && (
-            <span style={{ color: "red" }}>
-              Email must be 2 to 100 characters
-            </span>
-          )}
+          {this.state.email.value.length > 0 &&
+            !this.state.email.isValid &&
+            this.state.email.messageText}
         </div>
         <div>
           Password:
@@ -139,11 +140,9 @@ class Register extends React.Component {
             name="password"
             onChange={this.handleInputChange}
           />
-          {!this.state.password.isValid && (
-            <span style={{ color: "red" }}>
-              One upper, one lower, one number, one symbol, 8 characters
-            </span>
-          )}
+          {this.state.password.value.length > 0 &&
+            !this.state.password.isValid &&
+            this.state.password.messageText}
         </div>
         <div>
           {" "}
@@ -152,25 +151,11 @@ class Register extends React.Component {
             type="text"
             value={this.state.passwordConfirm.value}
             name="passwordConfirm"
-            // onBlur={
-            //   this.passwordMatch(
-            //     this.state.password.value,
-            //     this.state.passwordConfirm.value
-            //   ) ? (
-            //     <span style={{ color: "red" }}>
-            //       One upper, one lower, one number, one symbol, 8 characters
-            //     </span>
-            //   ) : (
-            //     <span>something else</span>
-            //   )
-            // }
             onChange={this.handleInputChange}
           />
-          {!this.state.passwordConfirm.isValid && (
-            <span style={{ color: "red" }}>
-              This must match the password above
-            </span>
-          )}
+          {this.state.passwordConfirm.value.length > 0 &&
+            !this.state.passwordConfirm.isValid &&
+            this.state.passwordConfirm.messageText}
         </div>
         <button
           disabled={
@@ -187,7 +172,7 @@ class Register extends React.Component {
         </button>
         <div>
           {this.state.success && <h2 style={{ color: "green" }}>Success!</h2>}
-          {this.state.success && <h2 style={{ color: "red" }}>Try Again!</h2>}
+          {this.state.error && <h2 style={{ color: "red" }}>Try Again!</h2>}
         </div>
       </div>
     );

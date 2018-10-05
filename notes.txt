@@ -1,3 +1,8 @@
+npm install react-router-dom
+
+456D!mn0
+456D!mn0y
+
 http://sabiobootcampapi.azurewebsites.net/api/people
 primaryImage.imageUrl
 Title

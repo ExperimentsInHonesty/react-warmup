@@ -5,3 +5,5 @@ class Editor extends React.Component {
 }
 
 export default Editor;
+
+import React from "react";
