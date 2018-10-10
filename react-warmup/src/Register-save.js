@@ -110,7 +110,6 @@ class Register extends React.Component {
         this.setState({ success: true, error: false });
         // this.clearForm();
         this.props.history.push("/login");
-        //this needs to push you to register form next
       })
       .catch(error => this.setState({ success: false, error: true }));
   };

@@ -5,11 +5,13 @@ class Login extends React.Component {
   state = {
     email: {
       value: "",
-      isValid: false
+      isValid: false,
+      message: ""
     },
     password: {
       value: "",
-      isValid: false
+      isValid: false,
+      message: ""
     },
 
     success: false,
@@ -21,17 +23,22 @@ class Login extends React.Component {
     // IMMEDIATELY when the component appears in the DOM
   }
 
-  validateEmail = email =>
-    /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
+  validateEmail = email => {
+    return {
+      validStatus: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email),
+      notValidMessage: "email not complete"
+    };
+  };
 
-  validatePassword = password =>
-    /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!$%^&*-]).{8,}/.test(
-      password
-    );
-
-  // validatePasswordConfirm = pass2 => this.state.password.value === pass2;
-
-  validateAllOtherFields = other => other.length >= 2 && other.length <= 100;
+  validatePassword = password => {
+    return {
+      validStatus: /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!$%^&*-]).{8,}/.test(
+        password
+      ),
+      notValidMessage:
+        "Password must contain an upper & lower case letter, a digit, a symbol and a total of 8 characters"
+    };
+  };
 
   validateAllFields = (typeOfItem, valueOfItem) => {
     if (typeOfItem === "email") {
@@ -40,42 +47,6 @@ class Login extends React.Component {
       return this.validatePassword(valueOfItem);
     }
   };
-
-  // validateAllFields = (typeOfItem, valueOfItem) => {
-  //   if (typeOfItem === "email") {
-  //     return this.validateEmail(valueOfItem);
-  //   } else if (typeOfItem === "password") {
-  //     return this.validatePassword(valueOfItem);
-  //   } else if (typeOfItem === "passwordConfirm") {
-  //     return this.validatePasswordConfirm(valueOfItem);
-  //   } else {
-  //     return this.validateAllOtherFields(valueOfItem);
-  //   }
-  // };
-
-  // handleEmailChange = e => {
-  //   const email = e.target.value;
-  //   let email_isValid = false;
-  //   if (email.length >= 2 && email.length <= 100) {
-  //     email_isValid = true;
-  //   }
-  //   //this.setState({ email: email, email_isValid: email_isValid });
-  //   this.setState({ email, email_isValid });
-  // };
-
-  // handlePasswordChange = e => {
-  //   const password = e.target.value;
-  //   let password_isValid = false;
-  //   if (
-  //     /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!$%^&*-]).{8,}/.test(
-  //       password
-  //     )
-  //   ) {
-  //     password_isValid = true;
-  //   }
-
-  //   this.setState({ password, password_isValid });
-  // };
 
   handleInputChange = event => {
     const name = event.target.name;
@@ -86,7 +57,8 @@ class Login extends React.Component {
       [name]: {
         ...this.state[name],
         value,
-        isValid
+        isValid: isValid.validStatus,
+        message: isValid.notValidMessage
       }
     });
   };
@@ -102,8 +74,25 @@ class Login extends React.Component {
         email: this.state.email.value,
         password: this.state.password.value
       })
-      .then(response => this.setState({ success: true, error: false }))
+      .then(response => {
+        this.setState({ success: true, error: false });
+        // this.clearForm();
+        this.props.history.push("/home");
+      })
       .catch(error => this.setState({ success: false, error: true }));
+  };
+
+  clearForm = () => {
+    this.setState({
+      email: {
+        ...this.email,
+        value: ""
+      },
+      password: {
+        ...this.password,
+        value: ""
+      }
+    });
   };
 
   render() {
@@ -118,13 +107,13 @@ class Login extends React.Component {
             type="text"
             value={this.state.email.value}
             name="email"
+            placeholder="email@email.com"
             onChange={this.handleInputChange}
           />
-          {!this.state.email_isValid && (
-            <span style={{ color: "gray" }}>
-              Email must be 2 to 100 characters
-            </span>
-          )}
+          {this.state.email.value.length > 0 &&
+            !this.state.email.isValid && (
+              <span style={{ color: "red" }}>{this.state.email.message}</span>
+            )}
         </div>
         <div>
           Password:
@@ -134,11 +123,12 @@ class Login extends React.Component {
             name="password"
             onChange={this.handleInputChange}
           />
-          {!this.state.password_isValid && (
-            <span style={{ color: "gray" }}>
-              One upper, one lower, one number, one symbol, 8 characters
-            </span>
-          )}
+          {this.state.password.value.length > 0 &&
+            !this.state.password.isValid && (
+              <span style={{ color: "red" }}>
+                {this.state.password.message}
+              </span>
+            )}
         </div>
         <button
           disabled={!this.state.email.isValid || !this.state.password.isValid}
@@ -148,7 +138,12 @@ class Login extends React.Component {
         </button>
         <div>
           {this.state.success && <h2 style={{ color: "green" }}>Success!</h2>}
-          {this.state.error && <h2 style={{ color: "red" }}>bad!</h2>}
+          {this.state.error && (
+            <h2 style={{ color: "red" }}>
+              Email/Pass combo rejected - not going to tell you why, because we
+              don't know
+            </h2>
+          )}
         </div>
       </div>
     );

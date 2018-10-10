@@ -1,4 +1,32 @@
+I have a image I want to use to logout that I can't figure out how to include on my page
+
+        {/* <div />
+        <fieldset>
+          <legend>Enter temperature in}:</legend>
+          <input
+            value={this.state.email.value}
+            onChange={this.handleInputChange}
+          />
+        </fieldset>
+        <div /> */}
+
+
+it didn't push the file from register to login  line 112.  Whatever the fix is, do it to login as well.
+
 npm install react-router-dom
+
+bonniesemail@gmail.com
+
+item.user.name
+
+ this.props.history.push("/home");
+
+item.actualUserId
+
+registered user
+{"firstName":"Bonnie","lastName":"Wolfe","email":"bonniesemail@gmail.com","password":"456D!mn0","passwordConfirm":"456D!mn0"}
+
+<span style={{ color: "red" }}>xxx</span>
 
 456D!mn0
 456D!mn0y
