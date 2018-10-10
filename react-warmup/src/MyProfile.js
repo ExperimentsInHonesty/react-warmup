@@ -11,6 +11,7 @@ class MyProfile extends React.Component {
     searchResultsPageIndex: 0,
     searchResultsTotalPages: 0,
     searchRecordsPerPage: 2,
+    searchQuery: "",
     searchResultsActive: false,
     success: false,
     error: false,
@@ -57,7 +58,14 @@ class MyProfile extends React.Component {
   };
 
   componentDidMount() {
-    this.handleDisplay(0, 5, "pageIndex", "totalPages", "records");
+    this.handleDisplay(
+      "/api/people/",
+      0,
+      5,
+      "pageIndex",
+      "totalPages",
+      "records"
+    );
   }
 
   validateFieldsForLength = (value, min, max) => {
@@ -147,14 +155,67 @@ class MyProfile extends React.Component {
     });
   };
 
-  // place in page where I want the searchBox to be {this.searchBoxCode}  //done
-  searchBoxCode = () => {
-    //add html to display search box
+  updateSearchQuery = event => {
+    const name = event.target.name;
+    const value = event.target.value;
+    this.setState({
+      [name]: value,
+      searchResultsActive: true
+    });
+    console.log("state", this.state.searchQuery);
   };
 
-  // write handler for a search button that will invoke this.handleDisplay with the search values (see API)
+  getSearchResults = () => {
+    console.log(
+      "in getSearchResults what is this.state.searchQuery",
+      this.state.searchQuery
+    );
+    this.handleDisplay(
+      "/api/people/search/",
+      0,
+      5,
+      "searchResultsPageIndex",
+      "searchResultsTotalPages",
+      "searchResults",
+      this.state.searchQuery
+    );
+  };
 
-  //place {this.dataToDisplay(this.state.searchResults)} in page where I want the search results to display - done
+  searchBoxDisplay = () => {
+    console.log("inside searchBoxDisplay");
+    return (
+      <div>
+        <div id="header-search">
+          <h1>Search</h1>
+        </div>
+        <div>
+          <label htmlFor="searchQuery" />
+          <input
+            type="text"
+            size="50"
+            id="searchQuery"
+            placeholder="type the text you want to search for in the profiles"
+            name="searchQuery"
+            value={this.state.searchQuery.value}
+            onChange={this.updateSearchQuery}
+          />
+          {/* {this.state.searchQuery.value.length > 0 &&
+            !this.state.searhQuery.isValid && (
+              <span style={{ color: "red" }}>
+                {this.state.searchQuerymessage}
+              </span>
+            )} */}
+          <button
+            disabled={!this.state.searchQuery.length > 2}
+            onClick={this.getSearchResults}
+          >
+            {" "}
+            Search
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   nextSearchResult = () => {
     this.handleSearchResultNavigationButtons(+1);
@@ -166,11 +227,13 @@ class MyProfile extends React.Component {
 
   handleSearchResultNavigationButtons = direction => {
     this.handleDisplay(
+      "/api/people/search/",
       this.state.searchResultsPageIndex + direction,
       this.state.searchRecordsPerPage,
       "searchResultsPageIndex",
       "searchResultsTotalPages",
-      "searchResults"
+      "searchResults",
+      this.state.searchQuery
     );
   };
 
@@ -238,6 +301,7 @@ class MyProfile extends React.Component {
   };
   handleProfileDisplayNavigationButtons = direction => {
     this.handleDisplay(
+      "/api/people/",
       this.state.pageIndex + direction,
       this.state.recordsPerPage,
       "pageIndex",
@@ -269,10 +333,17 @@ class MyProfile extends React.Component {
       });
   };
 
-  handleDisplay = (page, qty, pIndex, totalP, destination) => {
-    // console.log("in handleDisplay page =", page);
+  handleDisplay = (endpoint, page, qty, pIndex, totalP, destination, sq) => {
+    console.log("in handleDisplay searchQuery should be robots", sq);
+    let url = "";
+    if (endpoint === "/api/people/search/") {
+      url = endpoint + page + "/" + qty + "?q=" + sq;
+    } else {
+      url = endpoint + page + "/" + qty;
+    }
+
     axios
-      .get("/api/people/" + page + "/" + qty)
+      .get(url)
       .then(response => {
         // console.log("inside the then pIndex should equal pageIndex", pIndex);
         this.setState(
@@ -294,9 +365,9 @@ class MyProfile extends React.Component {
   render() {
     return (
       <div>
-        {/* <div>{this.searchBoxCode}</div> */}
+        <div>{this.searchBoxDisplay()}</div>
         <div id="frmContainer">
-          <div id="header">
+          <div id="header-profile">
             <h1>Profile</h1>
           </div>
 
@@ -479,8 +550,10 @@ class MyProfile extends React.Component {
         {this.state.searchResultsActive && (
           <React.Fragment>
             <div id="displaySearchResults">
-              <span>Search Results</span>
-              {this.dataToDisplay(this.state.searchResults)}
+              <div>
+                <span>Search Results</span>
+                {this.dataToDisplay(this.state.searchResults)}
+              </div>
               <hr />
               <div
                 className="col-md-10 center-block text-center"
