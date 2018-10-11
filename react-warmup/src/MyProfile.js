@@ -8,6 +8,7 @@ class MyProfile extends React.Component {
     recordsPerPage: 5,
     records: [],
     searchResults: [],
+    editRecord: {},
     searchResultsPageIndex: 0,
     searchResultsTotalPages: 0,
     searchRecordsPerPage: 2,
@@ -41,6 +42,11 @@ class MyProfile extends React.Component {
       messageText: ""
     },
     inputStatusId: {
+      value: "",
+      isValid: false,
+      messageText: ""
+    },
+    inputId: {
       value: "",
       isValid: false,
       messageText: ""
@@ -137,6 +143,7 @@ class MyProfile extends React.Component {
   };
 
   // updatePersonInput(event) {  // the reason this dosen't work is it dosen't bind this the below binds this because its an arrow function
+
   updatePersonInput = event => {
     const name = event.target.name;
     const value = event.target.value;
@@ -237,11 +244,87 @@ class MyProfile extends React.Component {
     );
   };
 
-  dataToDisplay = data => data.map(profile => this.writeToDOM(profile));
+  editProfile = event => {
+    const name = event.target.name;
+    this.handleEditProfile(name);
+  };
 
+  handleEditProfile = idNum => {
+    axios
+      .get("/api/people/" + idNum)
+      .then(response => {
+        // console.log("inside the then pIndex should equal pageIndex", pIndex);
+        this.setState({
+          inputTitle: {
+            ...this.state.inputTitle,
+            value: response.data.item.title,
+            isValid: this.validateAllFields(
+              this.state.inputTitle,
+              this.state.inputTitle.value
+            ),
+            message: ""
+          },
+          inputBio: {
+            ...this.state.inputBio,
+            value: response.data.item.bio,
+            message: "",
+            isValid: this.validateAllFields(
+              this.state.inputTitle,
+              this.state.inputTitle.value
+            )
+          },
+          inputSummary: {
+            ...this.state.inputSummary,
+            value: response.data.item.summary,
+            message: ""
+          },
+          inputHeadline: {
+            ...this.state.inputHeadline,
+            value: response.data.item.headline,
+            message: ""
+          },
+          inputSlug: {
+            ...this.state.inputSlug,
+            value: response.data.item.slug,
+            message: ""
+          },
+          inputStatusId: {
+            ...this.state.inputStatusId,
+            value: response.data.item.statusId,
+            message: ""
+          },
+          inputId: {
+            ...this.state.inputId,
+            value: response.data.item.id,
+            message: ""
+          },
+          inputSkills: {
+            ...this.state.inputSkills,
+            value: response.data.item.skills.map(obj => obj.name).join(", "),
+            message: ""
+          },
+          inputImage: {
+            ...this.state.inputImage,
+            value: response.data.item.primaryImage.imageUrl,
+            message: ""
+          },
+          editing: true
+        });
+        //set state is done
+      })
+      .catch(error => {
+        console.error(error);
+        this.setState({ success: false, error: true });
+      });
+  };
+
+  //invoked in render with search results and all records results (all records displays immediately since the get is invoked in componentDidMount, search results displays after search results are in state as searchResultsActive)
+  dataToDisplay = data => data.map(profile => this.writeToDOM(profile));
+  // invoked from writeToDOM to handle the array of skills, turning it into a string
   getSkillsFromObject = array => array.map(obj => obj.name).join(", ");
 
-  writeToDOM(record) {
+  //invoked by dataToDisplay
+  writeToDOM = record => {
     return (
       <div className="col-md-12 border border-secondary" key={record.id}>
         <div className="row">
@@ -254,7 +337,7 @@ class MyProfile extends React.Component {
                   alt={record.bio}
                   className="image"
                   align="left"
-                  name={record.id}
+                  // name={record.id}
                 />
               )}
           </div>
@@ -285,12 +368,21 @@ class MyProfile extends React.Component {
               </span>
               {/*  <span className="skills">{JSON.stringify(record.skills)}</span> */}
             </p>
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              name={record.id}
+              onClick={this.editProfile}
+            >
+              Edit
+            </button>
           </div>{" "}
+          {/* end of record */}
           <hr />
         </div>
       </div>
     );
-  }
+  };
   // This is the set of buttons for the all profiles display
   nextAllProfileDisplay = () => {
     this.handleProfileDisplayNavigationButtons(+1);
@@ -310,6 +402,30 @@ class MyProfile extends React.Component {
     );
   };
 
+  // post handler that UPDATES bios in the db
+  // handleUpdateClicked = event => {
+  //   event.preventDefault();
+  //   axios
+  //     .post("/api/people/", {
+  //       title: this.state.inputTitle.value,
+  //       bio: this.state.inputBio.value,
+  //       summary: this.state.inputSummary.value,
+  //       headline: this.state.inputHeadline.value,
+  //       slug: this.state.inputSlug.value,
+  //       statusId: this.state.inputStatusId.value,
+  //       skills: this.state.inputSkills.value.split(","),
+  //       primaryImage: this.state.inputImage.value
+  //     })
+  //     .then(response => {
+  //       this.setState({ success: true, error: false });
+  //       console.log("post sucessful");
+  //     })
+  //     .catch(error => {
+  //       this.setState({ success: false, error: true });
+  //       console.log("axios call failed");
+  //     });
+  // };
+  // post handler that ADDS bios to the db
   handleAddBioClicked = event => {
     event.preventDefault();
     axios
@@ -333,6 +449,33 @@ class MyProfile extends React.Component {
       });
   };
 
+  handleEditBioClicked = event => {
+    event.preventDefault();
+    const id = this.state.inputId.value;
+    const url = "/api/people/" + id;
+    axios
+      .put(url, {
+        title: this.state.inputTitle.value,
+        bio: this.state.inputBio.value,
+        summary: this.state.inputSummary.value,
+        headline: this.state.inputHeadline.value,
+        slug: this.state.inputSlug.value,
+        statusId: this.state.inputStatusId.value,
+        id: this.state.inputId.value,
+        skills: this.state.inputSkills.value.split(","),
+        primaryImage: this.state.inputImage.value
+      })
+      .then(response => {
+        this.setState({ success: true, error: false });
+        console.log("post sucessful");
+      })
+      .catch(error => {
+        this.setState({ success: false, error: true });
+        console.log("axios call failed", error);
+      });
+  };
+
+  //get handler that performs all the get calls
   handleDisplay = (endpoint, page, qty, pIndex, totalP, destination, sq) => {
     console.log("in handleDisplay searchQuery should be robots", sq);
     let url = "";
@@ -528,20 +671,38 @@ class MyProfile extends React.Component {
                     </span>
                   )}
               </div>
-              <button
-                disabled={
-                  !this.state.inputTitle.isValid ||
-                  !this.state.inputBio.isValid ||
-                  !this.state.inputSummary.isValid ||
-                  !this.state.inputHeadline.isValid ||
-                  !this.state.inputSlug.isValid ||
-                  !this.state.inputSkills.isValid ||
-                  !this.state.inputImage.isValid
-                }
-                onClick={this.handleAddBioClicked}
-              >
-                Add Bio
-              </button>
+              {!this.state.editing && (
+                <button
+                  disabled={
+                    !this.state.inputTitle.isValid ||
+                    !this.state.inputBio.isValid ||
+                    !this.state.inputSummary.isValid ||
+                    !this.state.inputHeadline.isValid ||
+                    !this.state.inputSlug.isValid ||
+                    !this.state.inputSkills.isValid ||
+                    !this.state.inputImage.isValid
+                  }
+                  onClick={this.handleAddBioClicked}
+                >
+                  Add Bio
+                </button>
+              )}
+              {this.state.editing && (
+                <button
+                  disabled={
+                    !this.state.inputTitle.isValid ||
+                    !this.state.inputBio.isValid ||
+                    !this.state.inputSummary.isValid ||
+                    !this.state.inputHeadline.isValid ||
+                    !this.state.inputSlug.isValid ||
+                    !this.state.inputSkills.isValid ||
+                    !this.state.inputImage.isValid
+                  }
+                  onClick={this.handleEditBioClicked}
+                >
+                  Edit Bio
+                </button>
+              )}
             </div>
             {/* end of divThatWrapsAroundAllFormFields */}
           </form>
