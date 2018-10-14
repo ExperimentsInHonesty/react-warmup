@@ -1,5 +1,7 @@
 import React from "react";
 import axios from "axios";
+import validateAllFields from "./Validate";
+import RecordDisplay from "./RecordDisplay";
 
 class MyProfile extends React.Component {
   state = {
@@ -74,74 +76,6 @@ class MyProfile extends React.Component {
     );
   }
 
-  validateFieldsForLength = (value, min, max) => {
-    return {
-      validStatus: value.length >= min && value.length <= max,
-      notValidMessage: `must have at least ${min} and no more than ${max} characters`
-    };
-  };
-  validateFieldNumberOnly = value => {
-    console.log("validateFieldNumberOnly", value);
-    console.log("parseInt", parseInt(value));
-    console.log(parseInt(value) === value);
-    return {
-      // validStatus: typeof parseInt(value) === "number" ? true : false,
-      validStatus:
-        Number.isInteger(parseInt(value)) && parseInt(value) > -1
-          ? true
-          : false,
-      notValidMessage: `This field is not required.  If provided it must be a number greater than -1`
-    };
-  };
-  validateFieldForUrl = (value, min) => {
-    return {
-      validStatus:
-        value.match(/https?:\/\//) && value.length >= min ? true : false,
-      notValidMessage: `must start with http: or https: and have a valid domain and image name with extention`
-    };
-  };
-  validateFieldForSkills = (value, min) => {
-    return {
-      validStatus: value.length >= min && value.match(/[,]/g) ? true : false,
-      notValidMessage: `Skills should be one word (or hyphenated e.g., baking-deserts) and seperated by commas`
-    };
-  };
-  validateAllFields = (typeOfItem, valueOfItem) => {
-    console.log("validateAllFields", typeOfItem);
-    const minNumber = 2;
-    const minNumforImage = 17;
-    const title = 120;
-    const bio = 700;
-    const summary = 255;
-    const headline = 80;
-    const slug = 100;
-    let maxNumber = 0;
-
-    if (typeOfItem === "inputTitle") {
-      maxNumber = title;
-    } else if (typeOfItem === "inputBio") {
-      maxNumber = bio;
-    } else if (typeOfItem === "inputSummary") {
-      maxNumber = summary;
-    } else if (typeOfItem === "inputHeadline") {
-      maxNumber = headline;
-    } else if (typeOfItem === "inputSlug") {
-      maxNumber = slug;
-    } else if (typeOfItem === "inputImage") {
-      return this.validateFieldForUrl(valueOfItem, minNumforImage);
-    } else if (typeOfItem === "inputStatusId") {
-      return this.validateFieldNumberOnly(valueOfItem);
-    } else if (typeOfItem === "inputSkills") {
-      return this.validateFieldForSkills(valueOfItem, minNumber);
-    } else {
-      return {
-        validStatus: true,
-        notValidMessage: ""
-      };
-    }
-    return this.validateFieldsForLength(valueOfItem, minNumber, maxNumber);
-  };
-
   // updatePersonInput(event) {  // the reason this dosen't work is it dosen't bind this the below binds this because its an arrow function
 
   updatePersonInput = event => {
@@ -150,7 +84,7 @@ class MyProfile extends React.Component {
     console.log("name", name);
     console.log("value", value);
     let isValid = false;
-    isValid = this.validateAllFields(name, value);
+    isValid = validateAllFields(name, value);
     console.log("isValid", isValid);
     this.setState({
       [name]: {
@@ -258,7 +192,7 @@ class MyProfile extends React.Component {
           inputTitle: {
             ...this.state.inputTitle,
             value: response.data.item.title,
-            isValid: this.validateAllFields(
+            isValid: validateAllFields(
               this.state.inputTitle,
               this.state.inputTitle.value
             ),
@@ -268,7 +202,7 @@ class MyProfile extends React.Component {
             ...this.state.inputBio,
             value: response.data.item.bio,
             message: "",
-            isValid: this.validateAllFields(
+            isValid: validateAllFields(
               this.state.inputTitle,
               this.state.inputTitle.value
             )
@@ -319,70 +253,12 @@ class MyProfile extends React.Component {
   };
 
   //invoked in render with search results and all records results (all records displays immediately since the get is invoked in componentDidMount, search results displays after search results are in state as searchResultsActive)
-  dataToDisplay = data => data.map(profile => this.writeToDOM(profile));
+  dataToDisplay = data =>
+    data.map(record => (
+      <RecordDisplay record={record} editProfile={this.editProfile} />
+    ));
   // invoked from writeToDOM to handle the array of skills, turning it into a string
-  getSkillsFromObject = array => array.map(obj => obj.name).join(", ");
 
-  //invoked by dataToDisplay
-  writeToDOM = record => {
-    return (
-      <div className="col-md-12 border border-secondary" key={record.id}>
-        <div className="row">
-          <div className="col-md-4">
-            {record.primaryImage &&
-              record.primaryImage.imageUrl.match(/https?:\/\//) && (
-                <img
-                  src={record.primaryImage.imageUrl}
-                  height="100"
-                  alt={record.bio}
-                  className="image"
-                  align="left"
-                  // name={record.id}
-                />
-              )}
-          </div>
-          <div className="col-md-8">
-            <p>
-              Title: <span className="title">{record.title}</span>
-            </p>
-            <p>
-              Bio: <span className="bio">{record.bio}</span>
-            </p>
-
-            <p>
-              Headline: <span className="headline">{record.headline}</span>
-            </p>
-
-            <p>
-              Slug: <span className="slug">{record.slug}</span>
-            </p>
-
-            <p>
-              Record ID: <span className="id">{record.id}</span>
-            </p>
-            <p>
-              skills:{" "}
-              <span className="skills">
-                {record.skills !== null &&
-                  this.getSkillsFromObject(record.skills)}
-              </span>
-              {/*  <span className="skills">{JSON.stringify(record.skills)}</span> */}
-            </p>
-            <button
-              type="button"
-              className="btn btn-outline-secondary"
-              name={record.id}
-              onClick={this.editProfile}
-            >
-              Edit
-            </button>
-          </div>{" "}
-          {/* end of record */}
-          <hr />
-        </div>
-      </div>
-    );
-  };
   // This is the set of buttons for the all profiles display
   nextAllProfileDisplay = () => {
     this.handleProfileDisplayNavigationButtons(+1);
